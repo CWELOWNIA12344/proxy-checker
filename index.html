@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .check-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .results-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .result-item {
+            background: #f9f9f9;
+            border-left: 4px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .result-item.success {
+            border-left-color: #4caf50;
+            background: #f1f8f4;
+        }
+
+        .result-item.error {
+            border-left-color: #f44336;
+            background: #fdf4f2;
+        }
+
+        .result-item.pending {
+            border-left-color: #ff9800;
+            background: #fff8f0;
+        }
+
+        .proxy-address {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .result-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .status-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-icon.success {
+            background: #4caf50;
+        }
+
+        .status-icon.error {
+            background: #f44336;
+        }
+
+        .status-icon.pending {
+            background: #ff9800;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Proxy Checker</h1>
+
+        <div class="input-section">
+            <label for="proxyInput">Enter Proxies (one per line)</label>
+            <textarea 
+                id="proxyInput" 
+                placeholder="127.0.0.1:8080&#10;192.168.1.1:3128&#10;proxy.example.com:8080"
+            ></textarea>
+            <div class="help-text">Format: IP:PORT or HOSTNAME:PORT</div>
+        </div>
+
+        <div class="button-group">
+            <button class="check-btn" id="checkBtn" onclick="checkProxies()">Check Proxies</button>
+            <button class="clear-btn" id="clearBtn" onclick="clearAll()">Clear</button>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Checking proxies...</p>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2>Results</h2>
+                <span class="results-count" id="resultsCount">0 proxies</span>
+            </div>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        function checkProxies() {
+            const input = document.getElementById('proxyInput').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const loader = document.getElementById('loader');
+            const checkBtn = document.getElementById('checkBtn');
+
+            // Clear previous error message
+            errorMessage.classList.remove('active');
+            errorMessage.textContent = '';
+
+            if (!input) {
+                errorMessage.textContent = 'Please enter at least one proxy address.';
+                errorMessage.classList.add('active');
+                return;
+            }
+
+            // Parse proxies
+            const proxies = input.split('\n')
+                .map(p => p.trim())
+                .filter(p => p.length > 0);
+
+            if (proxies.length === 0) {
+                errorMessage.textContent = 'Please enter valid proxy addresses.';
+                errorMessage.classList.add('active');
+                return;
+            }
+
+            // Validate proxy format
+            const invalidProxies = proxies.filter(p => !isValidProxyFormat(p));
+            if (invalidProxies.length > 0) {
+                errorMessage.textContent = `Invalid proxy format: ${invalidProxies[0]}. Use IP:PORT or HOSTNAME:PORT`;
+                errorMessage.classList.add('active');
+                return;
+            }
+
+            // Show loader and disable button
+            loader.classList.add('active');
+            checkBtn.disabled = true;
+
+            // Simulate proxy checking (replace with actual API call)
+            simulateProxyCheck(proxies);
+        }
+
+        function isValidProxyFormat(proxy) {
+            const regex = /^(.+):(\d+)$/;
+            const match = proxy.match(regex);
+            if (!match) return false;
+            const port = parseInt(match[2]);
+            return port > 0 && port <= 65535;
+        }
+
+        function simulateProxyCheck(proxies) {
+            const results = [];
+            let completed = 0;
+
+            proxies.forEach((proxy, index) => {
+                // Simulate random delay and result
+                const delay = Math.random() * 3000 + 500;
+                const isSuccess = Math.random() > 0.3;
+
+                setTimeout(() => {
+                    results[index] = {
+                        proxy: proxy,
+                        success: isSuccess,
+                        responseTime: isSuccess ? Math.random() * 3000 + 100 : null,
+                        error: isSuccess ? null : 'Connection timeout'
+                    };
+
+                    completed++;
+
+                    if (completed === proxies.length) {
+                        displayResults(results);
+                    }
+                }, delay);
+            });
+        }
+
+        function displayResults(results) {
+            const loader = document.getElementById('loader');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsList = document.getElementById('resultsList');
+            const resultsCount = document.getElementById('resultsCount');
+            const checkBtn = document.getElementById('checkBtn');
+
+            loader.classList.remove('active');
+            checkBtn.disabled = false;
+
+            resultsList.innerHTML = '';
+
+            const successCount = results.filter(r => r.success).length;
+            resultsCount.textContent = `${successCount}/${results.length} working`;
+
+            results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result-item ${result.success ? 'success' : 'error'}`;
+
+                const statusIcon = result.success ? '✓' : '✕';
+                const statusText = result.success 
+                    ? `Connected in ${result.responseTime.toFixed(2)}ms`
+                    : result.error;
+
+                resultDiv.innerHTML = `
+                    <div class="proxy-address">${result.proxy}</div>
+                    <div class="result-status">
+                        <span class="status-icon ${result.success ? 'success' : 'error'}"></span>
+                        ${statusText}
+                    </div>
+                `;
+
+                resultsList.appendChild(resultDiv);
+            });
+
+            resultsSection.classList.add('active');
+        }
+
+        function clearAll() {
+            document.getElementById('proxyInput').value = '';
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('active');
+            document.getElementById('proxyInput').focus();
+        }
+
+        // Focus on input when page loads
+        window.addEventListener('load', () => {
+            document.getElementById('proxyInput').focus();
+        });
+    </script>
+</body>
+</html>
